@@ -1,0 +1,3 @@
+[submodule "QuizGenerator"]
+	path = QuizGenerator
+	url = https://github.com/SadiaSaeed/QuizGenerator.git
