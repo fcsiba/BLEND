@@ -39,47 +39,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
+                                    @foreach ($users as $user)
                                     <tr>
-                                        <td>1</td>
-                                        <td>Areej Khalid</td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
+                                        <td><input readonly type='text' name="userID[]" style="width:40%;" value={{$user->users_id}}></td>
+                                        <td><input readonly type='text' name="userName[]" style="width:80%;" value="{{$user->user_name}} {{$user->user2_name}}"></td>
+                                        <td><input type='text' name="quiz[]" style="width:40%;" value={{$user->quiz2}}></td>
+                                        <td><input type='text' name="assignment[]" style="width:40%;" value={{$user->assignment}}></td>
+                                        <td><input type='text' name="presentation[]" style="width:40%;" value={{$user->presentation}}></td>
+                                        <td><input type='text' name="project[]" style="width:40%;" value={{$user->project}}></td>
+                                        <td><input type='text' name="midterm[]" style="width:40%;" value={{$user->midterm}}></td>
+                                        <td><input type='text' name="finals[]" style="width:40%;" value={{$user->finals}}></td>
                                     </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Mishaal Hajiani</td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Sadia Sayeed</td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                    </tr>
-                                    <tr>
-                                        <td>4</td>
-                                        <td>Syed Muhammad Maaz</td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                        <td><input type='text' style="width:40%;" value='0'/></td>
-                                    </tr>
+                                    @endforeach
                                     
                                 </tbody>
                             </table>

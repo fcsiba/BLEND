@@ -423,9 +423,11 @@ class CourseController extends Controller
             $course = $this->getColumnTable('courses');
         }
         $users = DB::table('users')
-                 ->select('users.id as users_id', 'users.name as user_name')
+                 ->select('users.id as users_id', 'first_name as user_name', 'last_name as user2_name', 'course_taken.quiz_marks as quiz2', 'course_taken.assignment_marks as assignment', 'course_taken.presentation_marks as presentation', 'course_taken.project_marks as project', 'course_taken.midterm_marks as midterm', 'course_taken.finalexam_marks as finals')
                  ->join('course_taken', 'users.id', '=', 'course_taken.user_id')
-                 ->join('courses', 'courses.id', '=', 'course_taken.course_id');
+                 ->where('course_taken.course_id', '=', $course_id)
+                 ->orderBy('users_id')
+                 ->get();
         return view('instructor.course.create_grading', compact('course', 'categories', 'instruction_levels', 'users'));
     }
 
@@ -533,55 +535,70 @@ class CourseController extends Controller
     public function instructorCourseGradingSave(Request $request)
     {
         $course_id = $request->input('course_id');
-        // echo '<pre>';print_r($_POST);exit;
-        $validation_rules = [
-            'course_title' => 'required|string|max:50',
-            'category_id' => 'required',
-            'instruction_level_id' => 'required',
-        ];
+        $userIDs = $request->input('userID');
+        $quiz = $request->input('quiz');
+        $assignment = $request->input('assignment');
+        $presentation = $request->input('presentation');
+        $project = $request->input('project');
+        $midterm = $request->input('midterm');
+        $finals = $request->input('finals');
 
-        $validator = Validator::make($request->all(),$validation_rules);
-
-        // Stop if validation fails
-        if ($validator->fails()) {
-            return $this->return_output('error', 'error', $validator, 'back', '422');
+        foreach($userIDs as $i => $userID)
+        {
+            $total = $quiz[$i] + $assignment[$i] + $presentation[$i] + $project[$i] + $midterm[$i] + $finals[$i];
+            $grade = '';
+            if ($total > 92.5)
+            {
+                $grade = 'A';
+            }
+            else if ($total > 87.5)
+            {
+                $grade = 'A-';
+            }
+            else if ($total > 82.5)
+            {
+                $grade = 'B+';
+            }
+            else if ($total > 77.5)
+            {
+                $grade = 'B';
+            }
+            else if ($total > 72.5)
+            {
+                $grade = 'B-';
+            }
+            else if ($total > 67.5)
+            {
+                $grade = 'C+';
+            }
+            else if ($total > 63.5)
+            {
+                $grade = 'C';
+            }
+            else if ($total > 59.5)
+            {
+                $grade = 'C-';
+            }
+            else {
+                $grade = 'F';
+            }
+            $course_taken = DB::table('course_taken')
+                                ->where('user_id', $userID)
+                                ->where('course_id', $course_id)
+                                ->update(array('quiz_marks' => $quiz[$i],
+                                                'assignment_marks' => $assignment[$i],
+                                                'presentation_marks' => $presentation[$i],
+                                                'project_marks' => $project[$i],
+                                                'midterm_marks' => $midterm[$i],
+                                                'finalexam_marks' => $finals[$i],
+                                                'total_marks' => $total,
+                                                'grade' => $grade,
+                                                'isCompleted' => 1));
+            
         }
-
-        if ($course_id) {
-            $course = Course::find($course_id);
-            $success_message = 'Course updated successfully';
-        } else {
-            $course = new Course();
-            $success_message = 'Course added successfully';
-
-            //create slug only while add
-            $slug = $request->input('course_title');
-            $slug = str_slug($slug, '-');
-
-            $results = DB::select(DB::raw("SELECT count(*) as total from courses where course_slug REGEXP '^{$slug}(-[0-9]+)?$' "));
-
-            $finalSlug = ($results['0']->total > 0) ? "{$slug}-{$results['0']->total}" : $slug;
-            $course->course_slug = $finalSlug;
-        }
-
-        $course->course_title = $request->input('course_title');
-        $course->instructor_id = \Auth::user()->instructor->id;
-        $course->category_id = $request->input('category_id');
-        $course->instruction_level_id = $request->input('instruction_level_id');
-        $course->keywords = $request->input('keywords');
-        $course->Credits = $request->input('Credits');
-        $course->overview = $request->input('overview');
-
-        $course->duration = $request->input('duration');
-        $course->price = $request->input('price');
-        $course->strike_out_price = $request->input('strike_out_price');
         
-        $course->is_active = $request->input('is_active');
-        $course->save();
 
-        $course_id = $course->id;
-
-        return $this->return_output('flash', 'success', $success_message, 'instructor-course-info/'.$course_id, '200');
+        return $this->return_output('flash', 'success', "Success", 'instructor-course-grading/'.$course_id, '200');
     }
 
     public function instructorCourseVideoSave(Request $request)
@@ -633,22 +650,6 @@ class CourseController extends Controller
         $courseVideos->updated_at = $created_at;
         if($courseVideos->save()){
             $course = Course::find($course_id);
-
-            //delete old video
-            $old_video = $this->model->getvideoinfoFirst($course->course_video);
-
-            if($old_video)
-            {
-                $old_file_name = 'course/'.$old_video->course_id.'/'.$old_video->video_title.'.'.$old_video->video_type;
-                $old_file_image_name = 'course/'.$old_video->course_id.'/'.$old_video->video_title.'.jpg';
-                if (Storage::exists($old_file_name)) {
-                    Storage::delete($old_file_name);
-                }
-
-                if (Storage::exists($old_file_image_name)) {
-                    Storage::delete($old_file_image_name);
-                }
-            }
 
             $course->course_video = $courseVideos->id;
             $course->save();
